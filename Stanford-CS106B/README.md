@@ -1,6 +1,6 @@
 # Stanford University - CS106B `2020F`
 
-### Standard Cpp Programming
+### Programming Abstractions
 
 ---
 
