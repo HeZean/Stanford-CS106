@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)http://web.stanford.edu/class/cs106l/hashmap.html -->
+<html lang="en" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>CS 106L: Standard C++ Programming</title>
+  <link rel="stylesheet" href="./Assignment 2_files/main.css">
+  <link rel="stylesheet" href="./Assignment 2_files/prism.css">
+</head>
+<body>
+  <nav>
+    <li class="title"><a href="http://cs106l.stanford.edu/">CS 106L</a></li>
+    <li><a href="http://web.stanford.edu/class/cs106l/lectures.html">Lectures</a></li>
+    <li><a href="http://web.stanford.edu/class/cs106l/hashmap.html#" class="active">Assignments</a></li>
+    <li><a href="http://web.stanford.edu/class/cs106l/policies.html">Policies</a></li>
+  </nav>
+  <div style="height: 0px;">&nbsp;</div> <!-- margin bleeding issues -->
+  <div class="body-container">
+    <div class="body body-assignment">
+      <div class="subcontainer">
+        <div class="panel purple">
+          <h1>Assignment 2:  HashMap</h1>
+          <p><i>Checkpoint due: Thursday, November 12 at 11:59 PM</i></p>
+          <p><i>Rest of assignment due: Wednesday, November 18 at 11:59 PM</i></p>
+          <hr>
+  
+          <p>According to veteran C++ programmers, there are two projects which bring together all the knowledge that a proficient C++ programmer should have:
+          </p><ol>
+            <li>Implementing a STL-compliant template class; and</li>
+            <li>Implement a macro to hash string literals at compile-time.</li>
+          </ol>
+          <p></p>
+          
+          <div class="aside-container">
+            <div class="aside">
+              <img src="./Assignment 2_files/geohashing.png"><br>
+              <p>Saturday is game night. <i>(Credit: <a href="https://xkcd.com/426/">https://xkcd.com/426/</a>.)</i></p>
+            </div>
+          </div>
+          
+          <p>
+            In this assignment, we will be putting <b>#1</b> on your resume by building a STL-compliant <b>HashMap</b>.</p>
+          <p>Recall that the <code>Map</code> abstract data type stores key → value pairs, and provides efficient lookup of the value of any key.
+          There are two versions of this in the STL: <code>std::map</code>, traditionally implemented using a balanced binary search tree, and <code>std::unordered_map</code> (introduced in C++11), which uses a clever technique called hashing and supports the most map operations in constant time (!).</p>
+        In this assignment, you will be given a minimal implementation of a HashMap (the name of this data structure in the Stanford C++ library) that you could have written in CS 106B. 
+      The starter code is functional, but is not "STL-compliant"; for example, copy and move semantics are not supported yet. Your goal is to extend it so it becomes an STL-compliant, industrial strength, robust, and blazingly fast data structure.
+        <p></p>
+            
+          <p>  
+            <b>You will not necessarily write a lot of code on this assignment</b> (~90 lines), but some of your time will be spent on understanding the starter code given to you, and reasoning about design choices and common C++ idioms. 
+            
+            <b>You may optionally work with a partner. We recommend having a partner to discuss the design questions.</b> If you choose to work with a partner, we ask that you and your partner submit a single version of the assignment among both of you. This means that you will ideally be working with your partner on a shared version of the code and short answer questions. Feel free to start a shared Google Doc, a private GitHub repository, or anything else that you'd need to keep track of a shared version of the code. You may also choose to schedule video chat sessions with each other to work on the assignment.
+          </p>
+        </div>
+        
+        <div class="panel">          
+          <h3>Assignment Timeline</h3>
+          <p>The starter code passes 7 of the 14 required test cases. To pass the assignment, your job is to get the remaining 7 test cases (4 in milestone 2, and 3 in milestone 3) to pass, and to reasonably answer all 10 short answer questions. </p>
+            <p>To help you stay on track for this assignment, we will require you to submit a checkpoint approximately one week before the deadline. 
+            For the checkpoint, please have Milestones 0 and 2 finished.</p>
+
+          
+          <div class="aside-container">
+            <div class="aside">
+              In the original version of the assignment, there were 10 milestones, and completing all milestones would help you accomplish #1. In the interest of time, and constrained by the fact that we only have 10 weeks, you only need to complete milestones 2, 3, and 4. We encourage you to go beyond the minimum requirements to create a truly STL-compliant template class, either now or in the future.
+            </div>
+          </div>
+          
+          
+          
+
+
+          
+   
+          <!-- <div class="aside-container">
+            <div class="aside">
+            <p>You might be wondering, why are we reimplementing something that is standardized in the STL? Implementing an STL-compliant HashMap container is a very good exercise because…
+              <ul>
+                <li>this forces you to understand how the STL was designed, so that you will be able to use the STL most effectively as the client. </li>
+                <li>you will use literally everything you learned from the class, from structs and references, functions and algorithms, everything in template class design, all the way up to the latest lecture in move semantics.</li>
+                <li>while the STL containers are great for general-purpose programming, people (in "the real world") absolutely implement their own containers. Let's say you were a data engineer. You may want to implement a HashMap that takes advantage of something specific to your domain (like cache locality). Say you were a Aero/Astro PhD trying to develop safety-critical code for your aircraft avoidance system. The STL containers aren't safety-critical, so you will have to develop your own using the same techniques. Are you writing optimized code for machine learning? Most machine learning frameworks use specialized data structures that allow vectorized operations, which surely do not use the standard provided data structures. The parts of Pytorch written in C++/CUDA probably didn't use the STL vector. They wrote their own specialized vector. Fun fact: the three students here were past CS106L students trying to apply C++ to their own domain.</li>
+              </ul>   
+            </p>
+          </div>
+          </div> -->
+          <p></p>
+ 
+          
+         <p>
+          Only Milestones 0, 2, 3, and 4 are required, but we are happy to support you in the other milestones:
+          
+          </p><div class="milestones">
+            <div class="milestone">
+              <h4>0</h4>
+              <p>Read about hashing. Examine starter code/test harness.</p>
+            </div>
+            <div class="milestone optional">
+              <h4>1* <span class="lines">10-15</span></h4>
+              <p>Complete the implementation of rehash.</p>
+            </div>
+            <div class="milestone">
+              <h4>2 <span class="lines">40-50</span></h4>
+              <p>Overload 4 operators and make Hashmap const-correct.</p>
+            </div>
+            <div class="due due-inline">
+              <b>Checkpoint due</b> Thursday, November 12 at 11:59 PM
+            </div>
+            <div class="milestone">
+              <h4>3 <span class="lines">30-40</span></h4>
+              <p>Implement 4 special member functions.</p>
+            </div>
+            <div class="milestone">
+              <h4>4</h4>
+              <p>Answer 10 short answer questions about your code.</p>
+            </div>
+            <div class="due due-inline">
+              <b>Final assignment due</b> Wednesday, November 18 at 11:59 PM
+            </div>
+            <div class="milestone optional">
+              <h4>5 <span class="lines">15</span></h4>
+              <p>Implement initializer_list and range constructors.</p>
+            </div>
+            <div class="milestone optional">
+              <h4>6 <span class="lines">120</span></h4>
+              <p>Implement an iterator class.</p>
+            </div>
+            <div class="milestone optional">
+              <h4>Beyond??</h4>
+              <p>See extensions.</p>
+            </div>
+            
+          </div>
+
+          
+          
+          <h3>Tips for the Assignment</h3>
+          <ul>
+          <li>Milestone 0 requires knowledge of linked lists, which CS 106B covers in week 7. You should have plenty of time to complete the assignment due in week 9.</li>
+          <li>The starter code comments are thorough, more so than this handout. Read them!</li>
+          <li>The handout may seem vague as in describing what you are supposed to do. We don't provide even the function prototypes. This is intentional. Designing the class definition itself is a valuable learning activity, and we don't want to constrain you to one particular design. You need to consider how a client might use your HashMap, and the test harness will try every reasonable way of using your class. Ask us if you are ever unsure about how to proceed. </li>
+          </ul></div>
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          <div class="panel">
+          <h3>Starter Code</h3>
+            <p><a href="http://web.stanford.edu/class/cs106l/assignments/A2-HashMap-Autumn-2020-Final.zip">Please download the starter code here</a>. The starter code contains the following files:
+          
+          </p><ul>
+            <li><code>hashmap.h</code>: This file contains the function prototypes for the minimal HashMap, and also contains very thorough comments about each function. The prototype for rehash() is provided here, but you will need to add your function prototypes for any function that you write for milestone 2 and 3.</li>
+            <li><code>hashmap.cpp</code>: This file contains the implementation of the HashMap, and also contains very thorough comments about implementation details. The skeleton for rehash() is provided here, and you will need to declare your own functions for milestones 2 and 3.. </li>
+            <li><code>student_main.cpp</code>: When the test harness is turned off (see below), the student_main() function in this file will be run. You can treat this as if you were writing your own main function to test your program.</li>
+            <li><code>test_settings.cpp</code>: This file contains macros which lets you on the test harness. If you turn on the test harness (#define RUN_TEST_HARNESS 1), test cases will be run. If it is turned off (#define RUN_TEST_HARNESS 0), the student_main function will be run. This is analogous to using NO_TESTS vs. ALL_TESTS in CS 106B's SimpleTest.<br>
+            The file also lets you turn on or off individual test cases. Test cases that are turned on will result in a PASS or FAIL when run. Test cases turned off always result in a SKIP (which is effectively a FAIL). The reason you will turn off test cases is that the test cases for milestones 2 and 3 may call functions that you have not declared or implemented, so turning them on will generate compiler errors. Only turn on a test case after you have implemented that function, as explained in the test_settings.cpp file. You may get compiler errors as well if your function prototype is incorrect (likely because of const correctness, or parameter/return value type issues).</li>
+            <li><code>tests.cpp</code>: This file contains the code for each test case. You are welcome to look at this, add some map.debug() statements, or even add your own test cases. We will test your code on an unaltered version of this file, so be careful about changing this file. </li>
+          </ul>
+          </div>
+          
+          <div class="panel">
+          <h3>Milestone 0: Background Reading and Examine Starter Code</h3>
+          You will implement the equivalent of the Stanford HashMap, using a hash table that resolves collisions using external separate chaining. 
+          Luckily for us, CS 106B covers hashing and external hash tables with chaining! 
+          Before reading further, familiarize yourself with hashing by reading the resources below (if you're in CS 106B or recently took it,
+          feel free to skip the CS 106B resources).
+          
+          <h4>The Map Interface</h4>
+          <ul>
+            <li>Stanford documentation of <a href="https://web.stanford.edu/dept/cs_edu/cppdoc/HashMap-class.html">HashMap</a>.</li>
+            <li>STL documentation of <a href="https://en.cppreference.com/w/cpp/container/map">std::map</a> and <a href="https://en.cppreference.com/w/cpp/container/unordered_map">std::unordered_map</a> (based on a hash-table).</li>
+            <li>CS 106B (Fall 2020) notes on <a href="https://web.stanford.edu/class/cs106b/lectures/06-set-map">Maps</a>.</li>
+          </ul>
+
+          <h4>Hashing</h4>
+          <p><i>Note: some authors insert a node to the end of a bucket's linked list. We will always insert into the front, since order doesn't matter and inserting to the front is faster and easier.</i></p>
+          <ul>
+            <li><a href="https://www.youtube.com/watch?v=T9gct6Dx-jo&amp;t=182s">A YouTube Video</a></li>
+            <li><a href="https://web.stanford.edu/class/archive/cs/cs106b/cs106b.1206/lectures/hashing/"> CS 106B lecture on hashing</a> (Spring 2020) - remember that in a map, we are storing pairs of keys and values.</li>
+            <li>OR CS 106B lecture on hashing (Fall 2020) - released on Friday.</li>
+            <li>Avery's <a href="https://stanford.zoom.us/rec/play/vZB4c-CpqTI3GtSTtQSDB6N6W9W_LKmsgXdIrKAJyUq2V3NSZ1v1brRBZueUNCcXUHH-rPthDknLc70b?continueMode=true&amp;_x_zm_rtaid=zoOYNUgXS86yRxAn22mMtw.1590257538915.5981c707f69063ae9dfca514a7f5f5b7&amp;_x_zm_rhtaid=757">recorded session on hashing</a> (optional if you're feeling a little shaky on hashing after reading above resources) </li>
+          </ul>
+          
+          <h4>Reading the Starter Code Documentation</h4>
+          <p>We could have asked you to implement a HashMap yourself given you knowledge from CS 106B. However, since practicing linked list algorithms is not the main goal of CS106L, we've given you the starter code. 
+          </p>
+          
+          <p>Read through the starter code's interface (.h) and template implementation (.cpp) files to understand what has already been implemented. This handout you are reading is fairly sparse, and the reason is that there is a lot of documentation provided in the starter code. You should be able to identify the standard map interface (constructor, <code>insert()</code>, <code>at()</code>, <code>contains()</code>, etc.) as well as the hash table implementation (<code>_bucket_arrays</code>, <code>node*</code>'s, etc.). </p>
+          
+          <p>You can call <code>map.debug()</code> inside the test cases to see a visual representation of the map printed to the console. You can call this function in your student_main function without the test harness, or inside the test cases. This will be useful when you begin milestone 1.</p>
+
+          <p>There's nothing you need to turn in after completing this milestone, but please do make sure that you're comfortable with the above content before moving on.</p>
+          </div>
+          
+          <div class="panel">
+          <h3>Optional Milestone 1: Implement rehash()</h3>
+          <p>This milestone is <b>optional</b>. It's a challenging linked list problem that will be great practice for CS 106B assignments and exams.</p>
+          <div class="aside-container">
+            <div class="aside">
+              Please don't make this your final personal project in CS 106B. :D
+            </div>
+          </div>
+          
+          <p>Implement the public member function <code>rehash()</code>, whose expected behavior is documented in the <code>.h</code> file. Your implementation of <code>rehash()</code> must not allocate or leak memory; instead, it should reuse existing nodes.</p>
+          
+          <p>The purpose of this milestone is to get you familiarized with the starter code and with working in a template class. It should also serve as a good review of the linked lists algorithms you learned in CS 106B. Our solution is <b>11</b> lines of code long. If you are unsure about the hash functions, we recommend looking at the implementations of insert() and erase().</p>
+          
+          <p>Once you are done, turn on the two tests for Milestone 1:
+            
+            </p><ul>
+              <li><span class="test">Test 1A</span> checks the external correctness of the rehash function, by verifying that your HashMap is still functional even if we rehash to various bucket sizes, including extremely large or small values. We also interweave the calls to <code>rehash()</code> with calls to <code>erase()</code> and <code>insert()</code>. Finally, there is a check to see if you correctly throw an exception when rehash(0) is called (this was done for you in the very first line of <code>rehash()</code>).</li>
+              <li><p><span class="test">Test 1B</span> roughly checks the internal correctness of the <code>rehash()</code> function. The idea is that buckets with longer linked lists should take longer to search, so we time various calls to <code>contains()</code> to verify that the sizes of the linked lists are roughly correct. This test is fairly rough as it depends on the speed of your computer, but we give it a large enough leeway that you should be able to pass the test. It is fine if this test fails with a small probability.</p></li>
+          </ul></div>
+          
+          <div class="panel">
+          <h3>Milestone 2: Operator Overloading and Const-Correctness</h3>
+          <p>In this section, you will first implement four operators, then make your HashMap const-correct.
+            After implementing an operator, turn on that operator's tests. There is one test for each category of operator, and one for const-correctness. </p>
+          
+          <h4>Indexing (<code>[]</code>)</h4>
+          <p>The index operator accepts a key, and returns a reference to its mapped value. The index operator should support <b>auto-insertion</b>—if a key is not found, then a new key/mapped pair is inserted with the given key and a default value of the mapped type.</p>
+          
+          <h4>Stream Insertion (<code>&lt;&lt;</code>)</h4>
+          <p>The stream insertion operator writes the contents of a HashMap into an output stream. The format resembles the format used by the Stanford HashMap, as seen below: </p>
+          <div class="aside-container">
+            <div class="aside trans100">
+              The pairs can be in any order, since this is, after all, an unordered map.
+            </div>
+          </div>
+          <div class="aside-container">
+            <div class="aside">
+              There should be a comma and a space between each pair, but not before the first pair or after the last pair.
+            </div>
+          </div>
+          
+          <pre class=" language-cpp"><code class=" language-cpp">HashMap<span class="token operator">&lt;</span>string<span class="token punctuation">,</span> <span class="token keyword">int</span><span class="token operator">&gt;</span> map<span class="token punctuation">;</span>
+cout <span class="token operator">&lt;&lt;</span> map <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>		<span class="token comment">// prints "{}"</span>
+map<span class="token punctuation">.</span><span class="token function">insert</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token string">"Anna"</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+cout <span class="token operator">&lt;&lt;</span> map <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>		<span class="token comment">// prints "{Anna:2}"</span>
+map<span class="token punctuation">.</span><span class="token function">insert</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token string">"Avery"</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+cout <span class="token operator">&lt;&lt;</span> map <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>		<span class="token comment">// prints either "{Avery:3, Anna:2}" </span>
+                            <span class="token comment">// or "{Anna:2, Avery:3}"</span></code></pre>
+          The stream insertion operator will need to support chaining.
+          
+          <h4>Equality (<code>==</code>) and Inequality (<code>!=</code>)</h4>
+          Two HashMaps are considered equal if they have the exact same key/mapped pairs. The internal order that they are stored, or the number of buckets, does not matter.
+          
+          <h4>Const Correctness</h4>
+          Finally, make your HashMap class const-correct. You will need to decide which functions (including those part of the starter code) and operators need to be modified.
+
+          <h4>Hint</h4>
+          For some parts of this milestone, you may find yourself having to add a friend in hashmap.h. This friend may be a template function, and since it's not a member function of the HashMap, we would need to explicitly write out the template declaration for this function in hashmap.h. Note that we can't reuse the same <code>K</code>, <code>M</code>, and <code>H</code> in this template declaration because these template parameters are already in use in the class declaration. Instead, we can use names other than <code>K</code>, <code>M</code>, and <code>H</code> for our function's template declaration.
+          
+          <div class="aside-container trans200">
+            <div class="aside">
+              If you find compiler errors appear after enabling <span class="test">Test 2D</span>, this means that either one of your prototypes is incorrect (eg. wrong const-ness), or your HashMap class is not const-correct and needs to be fixed.
+            </div>
+          </div>
+          </div>
+          
+          <div class="panel">
+            <h3>Milestone 3: Implement Special Member Functions</h3>
+            <p>Any good STL-compliant class must have correct <b>special member functions.</b>.
+            Recall that there are six major special member functions:</p>
+            <ul>
+              <li>Default constructor <i>(implemented for you)</i></li>
+              <li>Destructor <i>(implemented for you)</i></li>
+              <li>Copy constructor</li>
+              <li>Copy assignment operator</li>
+              <li>Move constructor</li>
+              <li>Move assignment operator</li>
+            </ul>
+            
+            <p>The first two are implemented for you; your job is to implement the last four.
+              Specifically, the <b>copy</b> operations should create an identical copy of the provided HashMap, while the <b>move</b> operations should move the contents of the provided HashMap to this. Avoid memory leaks and perform your copy/move as efficiently and safely as possible. 
+            </p>
+            <div class="aside-container">
+              <div class="aside trans200">
+                <h4>Efficiency Tips</h4>
+                <p>We are requiring you to use the <b>member initializer list</b> (colon after constructor) whenever possible for efficiency.</p>
+              </div>
+            </div>
+            
+            <p><span class="test">Test 3A</span> creates copies of your HashMap using the copy constructor and copy assignment operator, and verifies their correctness. In addition, there are tests for edge cases such as self-assignment. Test 3B tries to move HashMaps from one to another using the move constructor and move assignment, and verifies correctness just like test 3A. Note that Test 3B passes even if you only implemented the copy operations (recall that if no move operations are declared, the compiler defaults to the copy operations). Test 3C times your move operations to verify that you are actually moving the contents of the HashMaps rather than copying the contents.</p>
+            
+            The tests use some compiler directives (<code>#pragma</code>) to silence compiler warnings about self-assignment. You can safely ignore those.
+          </div>  
+          
+            
+            
+          
+          
+          
+          
+          <div class="panel">
+            <h3>Milestone 4: Answer Short Answer Questions</h3>
+            <p>Answer the following questions in the file named "short_answers.txt". These questions do not require long answers or even complete sentences. We will grade for reasonable correctness and effort—see an example below:</p>
+            
+            
+            <h3 class="question-title">Example</h3>
+            <p class="question-body">Consider the test case B_move_ctor_assignment. You should see a line with std::move(map1). Then, in the next line, we move from map1 to create move_constructed. Why is this valid?</p>
+            
+            
+            <i>Answer: std::move marks map eligible to be moved, but does not actually move.
+               A function taking an r-value (eg. move constructor) does the moving.
+               map1 is not passed to such a function, so we can still move from map1.</i>
+            <br>
+            <br>
+            
+            
+            <h3 class="question-title">1. Templates and Template Classes</h3>
+            <div class="question-body">
+              <ol type="a">
+                <li>In the clear() function, the for-each loop contains an auto&amp;. Explain what the deduced type of that auto is and why the ampersand is necessary.</li>
+                <li>Take a look at the code inside the test <code>F_custom_hash_function()</code> of the file tests.cpp. What is the purpose of <code>decltype</code>, and is there a way to write that line of code without using decltype? Explain.</li>
+                <li>STL containers store elements of type value_type, and for your HashMap this value_type is a <code>std::pair&lt;const K, M&gt;</code>;. What would be the problem in the HashMap class if value_type were instead <code>std::pair&lt;K, M&gt;</code>?</li>
+                <li>Take a look at the function <code>check_map_equal()</code> inside tests.cpp. You might notice that in the test cases, we use <code>check_map_equal()</code> to compare a HashMap and a std::map, but never to compare two HashMaps (we instead use <code>operator==</code>). Why can't we use <code>check_map_equal()</code> to compare two HashMaps? </li>
+              </ol></div>        
+            
+            <h3 class="question-title">2. Operator Overloading and Const Correctness</h3>
+            <div class="question-body">
+              <ol type="a">
+                <li>Why did you implement both a const and non-const version of <code>at()</code>, but only a non-const version of <code>operator[]</code>? (unlike in Vector where <code>operator[]</code> also had a const version)</li>
+                <li>Out of all the operators you overloaded, <code>operator&lt;&lt;</code> is the most interesting. </li>
+                <li>Did you implement <code>operator&lt;&lt;</code> as a member, a friend, or neither? Why?</li>                
+                <li>We had you overload <code>operator&lt;&lt;</code> as an exercise in operator overloading, but none of the STL collections have <code>operator&lt;&lt;</code> overloaded. Why do you think the STL designers made this decision?</li>
+                <!-- If you had to implement an iterator class for your HashMap (actually implementing one is optional, see milestone 6), what would its iterator category be and why? -->
+              </ol>
+            </div>
+            
+            <h3 class="question-title">3. Special Member Functions and Move Semantics</h3>
+            <div class="question-body">
+            <ol type="a">
+              <li>Consider a class <code>MyClass</code> which has three private members - a <code>size_t</code>, a function object, and a std::vector&lt;int&gt;. 
+              In this case the rule of zero applies and you should not write your own special member functions. In your HashMap class the rule of five applies - the starter code had the destructor, and you implemented the other four special member functions. 
+              Why does the rule of zero apply to MyClass?
+              </li>
+              <li>Why does your HashMap class follow the rule of five and not the rule of zero, if your HashMap private members are also a <code>size_t</code>, a function object, and a <code>std::vector</code>?</li>
+              <li>In your move constructor or move assignment operator, why did you have to std::move each member, even though the parameter (named rhs or other) is already an r-value reference?</li>
+            </ol>
+            </div>
+
+            <h3 class="question-title">4. RAII</h3>
+            <div class="question-body">
+            <ol type="a">
+              <li>Is your HashMap class RAII-compliant? If so, explain. If not, give a specific instance in which this could be a problem, and explain how you would make your class RAII-compliant.</li>
+            </ol>
+            </div>
+          </div>  
+          
+          
+    </div>
+
+          
+          
+      <div class="panel">
+        <h3>Submitting the Checkpoint</h3>    
+        <p>For the checkpoint, you should submit Milestone 2 in <b>two files:</b> <code>hashmap.cpp</code> and <code>hashmap.h</code>. If you worked with a partner, please have one partner submit the assignment. There will be a place on Paperless for you to enter in the other partner's SUNet ID so that you both get credit.</p>
+
+        <h3>Submitting the Final Project</h3>    
+        <p>When you're finished, submit <b>three files:</b> <code>hashmap.cpp</code>, <code>hashmap.h</code>, and your short-answer questions on Paperless! Follow the same instructions for partner work as above.</p>
+
+        <p>And finally... <span style="font-size: 2em;">Good luck! :)</span></p>
+
+      </div>
+
+    <div class="panel">
+      
+      <h3>Extensions: Creating a Fully STL-Compliant HashMap</h3>
+      <p>All of these are optional. Some may require supplemental material or additional readings. We provide an autograder for milestones 5 and 6. These tests are slightly less polished, but if you find any bugs, please let us know!</p>
+      
+      <h3>Milestone 5: Implement an initializer_list constructor and a range constructor.</h3>
+      <p>Add a constructor that allows you to construct your HashMap with an std::initializer_list. Also add a constructor that accepts a range (in the form of two iterators) to initialize your HashMap. This is a fairly easy extension that can be implemented in around 15 lines of code.</p>
+      
+      <h3>Milestone 6: Design an Iterator Class for your HashMap</h3>
+      <p>Using your response to question 7 in Milestone 4, implement an iterator class for your HashMap. Then, add support for const_iterator, and make sure that you can create const iterators, const_iterator, and const const_iterator. To reduce the repeated code, you may need to do some additional reading about type_traits and template metaprogramming. Talk to us if you want some guidance on this. Once you are done, change HashMap.cpp to use iterators. The code is much simpler with iterators!</p>
+      
+      <h3>More ideas (originally these were part of the assignment):</h3>
+      <ul>
+        <li>Implement iterator based versions of find() and erase() (milestone 7)</li>
+        <li>Implement r-value overloads of various member functions (milestone 8)</li>
+        <li>Incorporate smart pointers into the linked lists (milestone 9)</li>
+        <li>Implement try_emplace(), which will require knowledge of variadic templates and perfect forwarding. (originally milestone 10)</li>
+        <li>Equip the HashMap with a custom memory allocator.</li>
+        <li>Make some functions constexpr, add some compile-time optimizations.</li>
+        <li>Implement a LinkedHashMap, where iterators traverse the map in the order the elements were inserted.</li>
+        <li>Support automatic rehashing when the load factor is too high. </li>
+      
+      And beyond?
+      Every so often, we think of something new that makes our class more complete. The most recent addition is a converting constructor from iterator to const_iterator. If you come up with anything interesting, talk to us.
+      You're done! We enjoyed teaching you this quarter.
+      Thanks for the fun quarter, and have a great Thanksgiving/winter break!
+    </ul></div>
+
+      <script src="./Assignment 2_files/prism.js"></script>
+      <!-- <footer>
+      <small>© 2020. Created by Ethan Chi and Nikhil Raghuraman.</small>
+    </footer> -->
+  
+  
+</div></div></body></html>

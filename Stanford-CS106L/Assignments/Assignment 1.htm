@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<!-- saved from url=(0051)http://web.stanford.edu/class/cs106l/wikiracer.html -->
+<html lang="en" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>CS 106L: Standard C++ Programming</title>
+  <link rel="stylesheet" href="./Assignment 1_files/main.css">
+  <link rel="stylesheet" href="./Assignment 1_files/prism.css">
+</head>
+<body>
+  <nav>
+    <li class="title"><a href="http://cs106l.stanford.edu/">CS 106L</a></li>
+    <li><a href="http://web.stanford.edu/class/cs106l/lectures.html">Lectures</a></li>
+    <li><a href="http://web.stanford.edu/class/cs106l/wikiracer.html#" class="active">Assignments</a></li>
+    <li><a href="http://web.stanford.edu/class/cs106l/policies.html">Policies</a></li>
+  </nav>
+  <div style="height: 0px;">&nbsp;</div> <!-- margin bleeding issues -->
+  <div class="body-container">
+    <div class="body body-assignment">
+      <div class="subcontainer">
+        <div class="panel purple">
+          <h1>Assignment 1:  WikiRacer</h1>
+          <p><i>Screenshots due: Sunday, October 11 at 11:59 PM</i></p>
+          <p><i>Rest of assignment due: Friday, October 23 at 11:59 PM</i></p>
+
+          <h3>Introduction</h3>
+          <p>It's undeniable: human beings are obsessed with finding patterns.
+            Whether it's in the mysteries of language, the beauties of art, or the depths of strategic games, <a href="http://web.stanford.edu/class/think3/">finding patterns</a> is built into our DNA.
+            In fact, some biologists believe that finding patterns is what sets us apart as a species.</p>
+
+            <p>One interesting place to find interesting patterns is Wikipedia.
+              For example, we can play a game called <a href="https://www.thewikigame.com/group"><b>WikiRacer</b></a>, where we try to
+                move from one article to another with the fewest number of clicks. Try a round online before you move on! </p>
+
+            <div class="aside-container">
+              <div class="aside blue">
+                Aside: did you know that if you click the first link on any Wikipedia page repeatedly, you'll eventually always end up at Philosophy 97% of the time?
+              </div>
+            </div>
+                <p> In this assignment, we will be building a standard C++ program that plays WikiRacer!
+                  Specifically, it will find a path between two given Wikipedia articles in the fewest number of links. Throughout this assignment, we'll refer to
+                  this path as a "ladder."
+                  In the process of completing this assignment, you will get practice working with iterators, algorithms, templates, and special containers like a priority queue.</p>
+
+                  <p>A broad pseudocode overview of our algorithm is as follows:</p>
+
+                  <pre class=" language-cpp"><code class=" language-cpp">To find a ladder from startPage to endPage<span class="token operator">:</span>
+  Make startPage the currentPage being processed<span class="token punctuation">.</span>
+  Get set of links on currentPage<span class="token punctuation">.</span>
+  If endPage is one of the links on currentPage<span class="token operator">:</span>
+    We are done<span class="token operator">!</span> Return path of links followed to get here<span class="token punctuation">.</span>
+  Otherwise visit each link on currentPage in an intelligent way <span class="token operator">and</span>
+  search each of those pages in a similar manner<span class="token punctuation">.</span></code></pre>
+
+                  To simplify the implementation and allow for some testing, we will do this in two parts. In part A, you will write the function that gets the valid set of links from the current page (i.e. the greyed out step in the pseudocode). Then in part B, you will write the intelligent search algorithm that actually finds the ladder.
+                </div>
+
+                <div class="panel orange">
+                  <h3>Getting Started</h3>
+                  Download the project code <a href="http://web.stanford.edu/class/cs106l/assignments/02_WikiRacer.zip">here</a> and unzip. You will see three Qt Creator projects:
+                  <ul>
+                    <li><b>InternetTest</b>: used to make sure your computer works correctly with the Qt internet libraries.</li>
+                    <li><b>WikiRacerLinks</b>: where you'll develop the function <code>findWikiLinks</code> in part A. This project has special testing functionalities specific for part A.</li>
+                    <li><b>WikiRacer</b>: where you'll develop the finished program in part B.</li>
+                  </ul>
+
+                  <p>There are two preliminary steps you’ll need to do to set up your program.
+
+                  </p><h3>Screenshots</h3>
+                  <p>In order to verify that your computer works correctly with the Qt libraries, please take some screenshots and submit them!
+                    Open the <b>InternetTest</b> project in Qt Creator and run it.
+                    This should prompt you with a console with a bunch of text;
+                    Every time the console asks you to "take screenshot and press enter to continue", take a screenshot, then press enter.</p>
+
+                  <p>If nothing prints out when you press enter, then it may be because Qt creator isn't directing output to your terminal. To fix
+                    this, click on "Projects" on the lefthand pane of Qt creator, then click on "Run," and finally make sure that "Run in terminal"
+                    is checked.</p>
+
+                  <a href="https://forms.gle/XLQKeoxEuq4LpXLx7"></a><p><a href="https://forms.gle/XLQKeoxEuq4LpXLx7">Once you have <b>4</b> screenshots in total, please submit here.</a>
+                    If you get any compiler errors, or anything strange, please screenshot those too.
+                    </p>
+
+                  <div class="due">
+                    ⚠️ Screenshots are <b>due Sunday, October 11 at 11:59PM!</b> This is so that if any issues come up, we will have enough time to patch them up.
+                  </div>
+
+                  <h3>File Reading</h3>
+                  <p>
+                    Both WikiRacerLinks and WikiRacer come with sample files you can test your programs on.
+                    Your preliminary task is to <b>implement file reading</b> for both WikiRacerLinks and WikiRacer (in their respective main.cpp files).
+                    Both should require &lt;10 lines of code each.
+                  </p>
+                  <p>
+                    We have already provided the code to read in a filename from the user in both programs.
+                    Your task is to create a filestream from the filename, and then process the file data appropriately for the given program as follows:
+                    </p><ul>
+                      <li>WikiRacerLinks: Concatenate the contents of the file into a single string of data,
+                        and pass that string into <code>findWikiLinks</code> as the <code>page_html</code> parameter.
+                        Finally, print the result of <code>findWikiLinks</code> so that you can compare your output with the sample output.</li>
+                      <li>WikiRacer: The input files are formatted as follows: the first line contains the number of input pairs in the file, and each subsequent line consists of one input pair
+                        (i.e. two words, a start_page and end_page, separated by a space).
+                        See <code>input-small.txt</code> or <code>input-big.txt</code> for an example. You can assume files will be formatted correctly.<br>
+                        For each input pair, call <code>findWikiLadder</code> (which returns a dummy value for now, but which you will implement later) and append its result to <code>outputLadders</code>.
+                        Our starter code will then print out the contents of <code>outputLadders</code>.</li>
+                        If you’ve read the file, called <code>findWikiLadder</code>, and appended to <code>outputLadders</code> correctly, then you should see all of the file’s input pairs appear in the vectors printed to the console.
+                    </ul>
+                  <p></p>
+                  <div class="aside-container">
+                    <div class="aside blue trans100">
+                      For this preliminary part, findWikiLadder will always return the vector {“File reading works!”, start_page, end_page}.
+                    </div>
+                  </div>
+
+                  <p>
+                    <b>Implementation tips:</b>
+                      </p><ul>
+                        <li>Remember to avoid mixing <code>cin</code> and <code>getline</code>!</li>
+                        <li>Depending on how you implement reading in values, you may end up needing to convert a string to an integer.
+                          To do so, you can use the <code>stoi(line)</code> function, which takes in a <code>string line</code> and returns the integer it represents.</li>
+                        </ul>
+                  <p></p>
+                  <div class="aside-container trans100">
+                    <div class="aside">
+                      <p>For this assignment, you don’t need to handle the case that the user inputs an invalid filename.
+                        (Since you are your own user in this case, make sure that the filenames you type in are valid!)</p>
+                      </div>
+                    </div>
+
+
+                </div>
+
+                <div class="panel red">
+
+                      <h3>Part A</h3>
+                      <p>
+                        <i>
+                          Note: This part should be done in the main.cpp file in the WikiRacerLinks project. Don’t write this in the InternetTest project - that part is only for the screenshots.
+                        </i>
+
+                        </p><p>Congratulations on completing file reading! Let’s take a step back now and return to our algorithm.
+                          As you can imagine, a really important part of our code for this assignment will involve taking a Wikipedia page’s HTML and returning a set of all links on this page. Part A of the assignment will be to implement a function
+
+                          <!-- <pre><code>p { color: red }</code></pre> -->
+                          </p><pre class=" language-cpp"><code class=" language-cpp">unordered_set<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span> <span class="token function">findWikiLinks</span><span class="token punctuation">(</span><span class="token keyword">const</span> string<span class="token operator">&amp;</span> page_html<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+                          that takes a page’s HTML in the form of a string as a parameter, and returns an unordered_set&lt;string&gt; containing all the valid Wikipedia links in the page_html string.
+
+                          <div class="aside-container">
+                                <div class="aside">
+                                  For those who don’t remember, an unordered_set behaves exactly like a set but is faster when checking for membership (in the Stanford library it is called a HashSet).
+                                </div>
+                          </div>
+
+
+
+                            For our purposes, a link must satisfy the following:
+                            <ul>
+                              <li> It must be of the following form:
+                                <pre class=" language-html"><code class=" language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>/wiki/PAGE_NAME<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>LINK TEXT<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span></code></pre>
+                              </li>
+                              <li>PAGE_NAME does not contain the characters <code>#</code> or <code>:</code></li>
+                            </ul>
+                            <div class="aside-container">
+
+                              <div class="aside purple">
+                                <p><b>Webpages are written in a language known as HTML.</b></p>
+                                <p>All you need to know about HTML is how links are formatted:</p>
+                                <pre class=" language-html"><code class=" language-html">The sea otter (Enhydra lutris) is a
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>/wiki/Marine_mammal<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>marine mammal<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>
+native to the coasts of the northern and eastern North Pacific Ocean.
+                                </code></pre>
+                                which would display the following:
+
+                                <div class="box">
+                                  The sea otter (Enhydra lutris) is a <a href="http://web.stanford.edu/wiki/Marine_mammal">marine mammal</a>; native to the coasts of the northern and eastern North Pacific Ocean.
+                                </div>
+                                <p>
+
+                                </p></div>
+                            </div>
+                            Here's an example of what our function should do. Given the code:
+<pre class=" language-html"><code class=" language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">&gt;</span></span>
+  In <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>/wiki/Topology<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>topology<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>, the <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>b</span><span class="token punctuation">&gt;</span></span>long line<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>b</span><span class="token punctuation">&gt;</span></span> (or <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>b</span><span class="token punctuation">&gt;</span></span>Alexandroff line<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>b</span><span class="token punctuation">&gt;</span></span>) is a
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>/wiki/Topological_space<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>topological space<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span> somewhat similar to the <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>/wiki/Real_line<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>real line<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>, but in a certain way "longer". It behaves locally just like the real line, but has different large-scale properties (e.g., it is neither
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>/wiki/Lindel%C3%B6f_space<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>Lindelöf<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span> nor
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>/wiki/Separable_space<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>separable<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>). Therefore, it serves as one of the basic counterexamples of topology
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>http://www.ams.org/mathscinet-getitem?mr=507446<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>[1]<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>. Intuitively, the usual real-number line consists of a countable number of line segments [0,1) laid end-to-end, whereas the long line is constructed from an uncountable number of such segments. You can consult
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>/wiki/Special:BookSources/978-1-55608-010-4<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>this<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span> book for more information.
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+
+                            In this case, our function would return an unordered_set containing the following strings:
+                            <pre class=" language-cpp"><code class=" language-cpp"><span class="token punctuation">{</span><span class="token string">"Topology"</span><span class="token punctuation">,</span> <span class="token string">"Topological_space"</span><span class="token punctuation">,</span> <span class="token string">"Real_line"</span><span class="token punctuation">,</span> <span class="token string">"Lindel%C3%B6f_space"</span><span class="token punctuation">,</span> <span class="token string">"Separable_space"</span><span class="token punctuation">}</span></code></pre>
+
+                            Note two things of interest here:
+
+                            <ul>
+                              <li>The function does not return links to AMS or Special:BookSources because they are not valid Wikipedia links.
+                                (The first is not of the form <code>/wiki/PAGENAME</code> and the second contains the invalid character <code>:</code>)</li>
+                                <li>The Lindelöf link seems to have weird percentage signs and letters in its hyperlink. This is how HTML handles non-standard characters like 'ö'; don't worry about this!</li>
+                              </ul>
+
+                              <p>
+                                The code we’ll be learning over the next few STL lectures will be really helpful for this part of the assignment.
+                                Specifically, pay attention to the <code>countOccurrences</code> method from lecture, which will sequentially look through a text for instances of a string.
+                                You’ll use a similar approach here.
+                              </p>
+
+                              <p>
+                                Don’t forget to test your function using the test files in the res folder! See the File Reading section in the Preliminary Task section for more information on how to test.
+                              </p>
+
+                              <p>Your solution <b>must</b> use the following algorithms to do the following things:</p>
+<pre class=" language-cpp"><code class=" language-cpp">std<span class="token operator">::</span>search    <span class="token comment">// to find the start of a link</span>
+std<span class="token operator">::</span>find      <span class="token comment">// to find the end of a link</span>
+std<span class="token operator">::</span>all_of    <span class="token comment">// to check whether the link contains an invalid character</span>
+</code></pre>
+
+<p>We'll get practice using algorithms in lecture. Feel free to also take a look at <a href="https://en.cppreference.com/w/">cppreference.com</a> for documentation on the above algorithms.</p>
+
+                      <p>Note: by the end of Part A, you should’ve completed everything in the WikiRacerLinks program, and been able to test your <code>findWikiLinks</code> function.</p>
+
+                      <p><i>Hint:</i> At some point in your code, you may find yourself having to copy a portion of an original string into a new string using only iterators of that original string. If you have iterators <code>start_it</code> and <code>end_it</code> of your original string and you want to copy all character in the range [<code>start_it</code>, <code>end_it</code>) (inclusive of <code>start_it</code> and exclusive of <code>end_it</code>), you can do something like the following: <code>auto string_portion = std::string(start_it, end_it);</code>.</p>
+                            </div>
+
+
+
+                            <div class="panel red">
+
+                              <!-- If you want to discuss your plan of attack or discuss where an algorithm might be useful, please make a private post on Piazza! -->
+
+                              <h3>Part B</h3>
+                              <i>Note: This part should be done in the main.cpp file in the WikiRacer project, not the WikiRacerLinks project!
+                                (You’ll also be copying your code from Part A into the wikiscraper.cpp file in the WikiRacer project - see instructions later down.)</i>
+
+                              <p>Congratulations on finishing the first part of the assignment! You have now implemented a function</p>
+
+                              <pre class=" language-cpp"><code class=" language-cpp">unordered_set<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span> <span class="token function">findWikiLinks</span><span class="token punctuation">(</span><span class="token keyword">const</span> string<span class="token operator">&amp;</span> page_html<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+                              <p>that takes the html of a page in the form of a string as a parameter and
+                              returns an <code class=" language-cpp">unordered_set<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span></code>
+                              containing all the valid Wikipedia links in the <code class=" language-cpp">page_html</code> string.</p>
+
+
+
+                              <p>In this next part, we are going to write the code to actually find a Wikipedia ladder between two pages.
+                                We will be writing a function:
+
+</p><pre class=" language-cpp"><code class=" language-cpp">vector<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span> <span class="token function">findWikiLadder</span><span class="token punctuation">(</span><span class="token keyword">const</span> string<span class="token operator">&amp;</span> start_page<span class="token punctuation">,</span>
+                              <span class="token keyword">const</span> string<span class="token operator">&amp;</span> end_page<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+                              that takes a string representing the name of a start page and a string representing the name of the target page
+                               and returns a <code class=" language-cpp">vector<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span></code> that will be the link ladder between the start page and the end page.
+                               <div class="aside-container">
+                                 <div class="aside purple trans200">
+                                   <p>For example, a call to findWikiLadder("Mathematics", "American_literature")
+                                   might return the vector that looks like
+                                   <code class=" language-cpp"><span class="token punctuation">{</span>Mathematics<span class="token punctuation">,</span> Alfred_North_Whitehead<span class="token punctuation">,</span> Americans<span class="token punctuation">,</span> Visual_art_of_the_United_States<span class="token punctuation">,</span> American_literature<span class="token punctuation">}</span></code>
+                                   since from the Mathematics wikipedia page, you can follow a link to <span class="wikilink">Alfred_North_Whitehead</span>,
+                                   then follow a link to <span class="wikilink">American</span>,
+                                   then <span class="wikilink">Visual_art_of_the_United_States</span>,
+                                   and finally <span class="wikilink">American_Literature</span>.</p>
+                                 </div>
+                               </div>
+                              We are going to break the project into steps:
+                              <p></p>
+                            </div>
+
+                            <div class="panel blue">
+                              <h3>Designing the Algorithm</h3>
+                              <p>We want to search for a link ladder from the start page to the end page.
+                                The hard part in solving a problem like this is dealing with the fact that Wikipedia is enormous.
+                                We need to make sure our algorithm makes intelligent decisions when deciding which links to follow
+                                so that it can find a solution quickly.</p>
+
+                              <p>A good first strategy to consider when designing algorithms like these is to contemplate how
+                                you as a human would solve this problem.
+                                Let’s work with a small example using some simplified Wikipedia pages.
+                              Suppose our start page is <span class="wikilink">Lion</span> and our target page is <span class="wikilink">Barack_Obama</span>.
+                              Let’s say these are the links we could follow from <span class="wikilink">Lion</span>:</p>
+                              <div class="aside-container">
+                                <div class="aside blue">
+                                Throughout this assignment, we will define the <b>name</b> of a Wikipedia page to be what gets displayed in the url when you visit that page on your browser.
+                                For example, the name of the Stanford University page would be <span class="wikilink">Stanford_University</span>  (note the _ instead of spaces).<p></p>
+                              </div>
+                            </div>
+                              <ul>
+                                <li><span class="wikilink">Middle_Ages</span></li>
+                                <li><span class="wikilink">Federal_government_of_the_United_States</span></li>
+                                <li><span class="wikilink">Carnivore</span></li>
+                                <li><span class="wikilink">Cowardly_Lion</span></li>
+                                <li><span class="wikilink">Subspecies</span></li>
+                                <li><span class="wikilink">Taxonomy_(biology)</span></li>
+                              </ul>
+
+                              <p>Which link would you choose to explore first?
+                                It is fairly clear that some of these links look more promising than others.
+                                For example, the link to the page titled  <span class="wikilink">Federal_government_of_the_United_States</span> looks like a winner since it is probably really close to the <span class="wikilink">Barack_Obama</span> page.
+                                On the other hand, the <span class="wikilink">Subspecies</span> page is less directly related to a page about a former president of the United States and will probably not lead us anywhere helpful in terms of finding the target page.
+                              </p>
+                              <p>
+                              In our algorithm, we want to capture this idea of following links to pages “closer” in meaning to the target page before those that are more unrelated. How can we measure this similarity?
+                              One idea to determine “closeness” of a page to the target page is to count the number of links in common between that page and the target page. The intuition is that pages dealing with similar content will often have more links in common than unrelated pages. This intuition seems to pan out in terms of the links we just considered. For example, here are the number of links each of the pages above have in common with the target <span class="wikilink">Barack_Obama</span> page:
+                            </p>
+
+                              <table>
+                                <tbody><tr>
+                                  <th>Page</th>
+                                  <th>Links in common with <span class="wikilink">Barack_Obama</span> page
+                                </th></tr>
+                                <tr>
+                                  <td><span class="wikilink">Middle_Ages</span></td>
+                                  <td>0</td>
+                                </tr>
+                                <tr>
+                                  <td><span class="wikilink">Federal_government_of_the_United_States</span></td>
+                                  <td>5</td>
+                                </tr>
+                                <tr>
+                                  <td><span class="wikilink">Carnivore</span></td>
+                                  <td>0</td>
+                                </tr>
+                                <tr>
+                                  <td><span class="wikilink">Cowardly_Lion</span></td>
+                                  <td>0</td>
+                                </tr>
+                                <tr>
+                                  <td><span class="wikilink">Subspecies</span></td>
+                                  <td>0</td>
+                                </tr>
+                                <tr>
+                                  <td><span class="wikilink">Taxonomy_(biology)</span></td>
+                                  <td>0</td>
+                                </tr>
+                              </tbody></table>
+
+                              <p>This makes sense!
+                                Of course the kind of links on the <span class="wikilink">Barack_Obama</span> page will be similar to those on the <span class="wikilink">Federal_government_of_the_United_States</span> page;
+                                they are related in their content.
+                                For example, these are the links that are on both the <span class="wikilink">Federal_government_of_the_United_States</span> page and the <span class="wikilink">Barack_Obama</span> page:
+                              </p>
+                              <ul>
+                                <li><span class="wikilink">Democratic_Party_(United_States)</span></li>
+                                <li><span class="wikilink">United_States_Senate</span></li>
+                                <li><span class="wikilink">President_of_the_United_States</span></li>
+                                <li><span class="wikilink">Donald_Trump</span></li>
+                                <li><span class="wikilink">Vice_President_of_the_United_States</span></li>
+                              </ul>
+                              Thus, our idea of following the page with more links in common with the target page seems like a promising metric. Equipped with this, we can start writing our algorithm.
+                            </div>
+
+
+                            <div class="panel blue">
+                              <h3>The Algorithm</h3>
+                              <p>In this assignment, we will use a <b>priority queue</b>: a data structure where elements can be enqueued (just like a regular queue),
+                              but the element with the highest priority (determined by a priority function) is returned on a request to dequeue.
+                              This is useful for us because we can enqueue each possible page we could follow
+                              and define each page’s priority to be the number of links it has in common with the target page.
+                              Thus, when we dequeue from the queue, the page with the highest priority (i.e. the most number of links in common with the target page) will be dequeued first.</p>
+
+                              <p>In our code, we will use a <code>vector&lt;string&gt;</code> to represent a “link ladder” between pages, where pages are represented by their links.
+                                Our pseudocode looks like this:</p>
+
+                              <pre class=" language-null"><code class=" language-null">Finding a link ladder between pages start_page and end_page:
+
+Create an empty priority queue of ladders (a ladder is a vector&lt;string&gt;).
+
+Create/add a ladder containing {start_page} to the queue.
+
+While the queue is not empty:
+
+    Dequeue the highest priority partial-ladder from the front of the queue.
+
+    Get the set of links of the current page i.e. the page at the end of the
+      just dequeued ladder.
+
+    If the end_page is in this set:
+        We have found a ladder!
+        Add end_page to the ladder you just dequeued and return it.
+
+    For each neighbour page in the current page’s link set:
+
+        If this neighbour page hasn’t already been visited:
+
+            Create a copy of the current partial-ladder.
+
+            Put the neighbor page string at the end of the copied ladder.
+
+            Add the copied ladder to the queue.
+
+
+If while loop exits without returning from the function, no ladder was found so return an empty vector&lt;string&gt;
+                              </code></pre>
+
+  <div class="aside-container">
+    <div class="aside purple trans400">
+      We would strongly suggest you print the ladder as you dequeue it at the start of the while loop so that you can see what your algorithm is exploring.
+      Please remove this print statement before you turn in the assignment.
+    </div>
+  </div>
+
+
+
+
+  <h4>Using the WikiScraper Class</h4>
+
+  <p>To assist you with connecting to Wikipedia and getting the page html, we have provided a WikiScraper class.
+    It exports the following public method:
+
+  </p><pre class=" language-cpp"><code class=" wrap language-cpp">unordered_set<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span> <span class="token class-name">WikiScraper</span><span class="token operator">::</span><span class="token function">getLinkSet</span><span class="token punctuation">(</span><span class="token keyword">const</span> string<span class="token operator">&amp;</span> page_name<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+  which takes a string representing the name of a Wikipedia page and returns a set of all links on this page.
+
+
+
+  <p>In part A of this assignment, you wrote most of the code that implements the functionality of the <code>getLinkSet</code> method.
+    The WikiScraper class adds a bit more functionality on top of the <code>findWikiLinks</code> method you wrote to avoid redundant work,
+    but otherwise completely relies on <code>findWikiLinks</code> to work properly.</p>
+
+  <p>Your first task is to copy your code from the <code>findWikiLinks</code> method you wrote for part A and
+    replace the unimplemented <code>findWikiLinks</code> method in the wikiscraper.cpp file.
+    Once this is done, the WikiScraper class is complete and you can use it for the rest of the assignment.</p>
+
+  <p>To use the class, you will first need to make a single WikiScraper object in the <code>findWikiLadder</code> method that you are implementing in main.cpp.
+    This would look something like this:
+
+</p><pre class=" language-cpp"><code class=" language-cpp">vector<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span> <span class="token function">findWikiLadder</span><span class="token punctuation">(</span><span class="token keyword">const</span> string<span class="token operator">&amp;</span> start_page<span class="token punctuation">,</span>
+<span class="token keyword">const</span> string<span class="token operator">&amp;</span> end_page<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+  <span class="token comment">// creates WikiScraper object</span>
+  WikiScraper scraper<span class="token punctuation">;</span>
+
+  <span class="token comment">// gets the set of links on page specified by end_page</span>
+  <span class="token comment">// variable and stores in target_set variable</span>
+  <span class="token keyword">auto</span> target_set <span class="token operator">=</span> scraper<span class="token punctuation">.</span><span class="token function">getLinkSet</span><span class="token punctuation">(</span>end_page<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// ... rest of implementation</span>
+<span class="token punctuation">}</span></code></pre>
+
+<div class="aside-container">
+  <div class="aside red trans300">
+    <b>Note:</b> Do <b>not</b> create more than one WikiScraper object;
+    doing so will slow your code down.
+    Just create one at the start of the function and pass it around wherever it is needed.
+  </div>
+</div>
+
+</div>
+
+<div class="panel red">
+
+  <h3>Creating the Priority Queue</h3>
+  <p>
+    The next task in the assignment is to make a priority queue using a constructor from the standard library.
+    Although this sounds like a simple task in theory, it will require you to really understand how to use lambdas and variable capture.
+  </p>
+
+  <p>The first thing to do is read the documentation for <code>std::priority_queue</code>. The format of a <code>std::priority_queue</code> looks like this:</p>
+
+  <pre class=" language-cpp"><code class=" language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token punctuation">,</span>
+    <span class="token keyword">class</span> <span class="token class-name">Container</span> <span class="token operator">=</span> std<span class="token operator">::</span>vector<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span><span class="token punctuation">,</span>
+    <span class="token keyword">class</span> <span class="token class-name">Compare</span>   <span class="token operator">=</span> std<span class="token operator">::</span>less<span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">Container</span><span class="token operator">::</span>value_type<span class="token operator">&gt;</span>
+<span class="token operator">&gt;</span> <span class="token keyword">class</span> <span class="token class-name">priority_queue</span><span class="token punctuation">;</span> </code></pre>
+
+Let’s break this down. This is telling us the <code>std::priority_queue</code> needs three template types specified to be constructed, specifically:
+<ul>
+  <li><code>T</code> is the type of thing the priority queue will store;</li>
+  <li><code>Container</code> is the container the priority queue will use behind the scene to hold items (the priority queue is a container adaptor, just like the stack and queue we studied in lecture!);</li>
+  <li><code>Compare</code> is the type of our comparison function that will be used to determine which element has the highest priority.
+  </li></ul>
+
+<p>Since we want a priority_queue of ladders, where we represent a ladder as a <code class=" language-cpp">vector<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span></code>,
+we will take T to be <code class=" language-cpp">vector<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span></code>, and so the Container, which is of the form
+<code class=" language-cpp">vector<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span></code>, will be a <code class=" language-cpp">vector<span class="token operator">&lt;</span>vector<span class="token operator">&lt;</span>string<span class="token operator">&gt;&gt;</span></code>.</p>
+
+<p>Lastly, we need to determine what comparator function we want to use.
+  Remember, we want to order the elements by how many links the page at the very end of its respective ladder has in common with the target_page.
+  To make the priority_queue we will need to write this comparator function:</p>
+
+<pre class=" language-cpp"><code class=" language-cpp">To compare ladder1 <span class="token operator">and</span> ladder2<span class="token operator">:</span>
+  page1 <span class="token operator">=</span> word at the end of ladder1
+  page2 <span class="token operator">=</span> word at the end of ladder2
+  <span class="token keyword">int</span> num1 <span class="token operator">=</span> number of links in common between set of links on page1 <span class="token operator">and</span> set of links on end_page
+  <span class="token keyword">int</span> num2 <span class="token operator">=</span> number of links in common between set of links on page2 <span class="token operator">and</span> set of links on end_page
+  <span class="token keyword">return</span> num1 <span class="token operator">&lt;</span> num2</code></pre>
+
+  <div class="aside-container">
+    <div class="aside red trans100">
+      <b>Note:</b> This function will need to have access to the WikiScraper object you made in your findWikiLadder() method so that it can get the set of links on page1 and page2.
+      Think about how you can write this comparison function as a <b>lambda</b> that can access
+      the WikiScraper object in the function where the lambda is declared.
+    </div>
+  </div>
+
+  <p>Now that we have all of the details, we can create the <code>priority_queue</code>,
+    which takes three template parameters:
+    the thing to store (ladder),
+    the container to use behind the scenes (<code class=" language-cpp">vector<span class="token operator">&lt;</span>ladder<span class="token operator">&gt;</span></code>),
+    and the type of the comparison function we will use. </p>
+
+  <p>We hit a little snag here, since if we write our comparison function as a lambda,
+    we have no idea what its type is.
+    Luckily, C++ provides the <code class=" language-cpp"><span class="token keyword">decltype</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code> method
+    which takes an object and returns its type.
+  Then, to the constructor of the priority_queue, we actually just pass the comparison function. </p>
+
+  <p>
+  Our final <code class=" language-cpp">priority queue</code> looks like this:
+  </p>
+
+<pre class=" language-cpp"><code class=" language-cpp">vector<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span> <span class="token function">findWikiLadder</span><span class="token punctuation">(</span><span class="token keyword">const</span> string<span class="token operator">&amp;</span> start_page<span class="token punctuation">,</span>
+<span class="token keyword">const</span> string<span class="token operator">&amp;</span> end_page<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">// creates WikiScraper object</span>
+  WikiScraper scraper<span class="token punctuation">;</span>
+
+  <span class="token comment">// Comparison function for priority_queue</span>
+  <span class="token keyword">auto</span> cmpFn <span class="token operator">=</span> <span class="token comment">/* declare lambda comparator function */</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// creates a priority_queue names ladderQueue</span>
+  std<span class="token operator">::</span>priority_queue<span class="token operator">&lt;</span>vector<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span><span class="token punctuation">,</span> vector<span class="token operator">&lt;</span>vector<span class="token operator">&lt;</span>string<span class="token operator">&gt;&gt;</span><span class="token punctuation">,</span>
+    <span class="token keyword">decltype</span><span class="token punctuation">(</span>cmpFn<span class="token punctuation">)</span><span class="token operator">&gt;</span> <span class="token function">ladderQueue</span><span class="token punctuation">(</span>cmpFn<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// ... rest of implementation</span>
+
+<span class="token punctuation">}</span></code></pre>
+
+
+
+</div>
+
+<div class="panel blue">
+            <h3>Testing</h3>
+
+            Don’t forget to test your code using the test files in the res folder! You can compare your output with the sample runs in the sample-outputs.txt file. See the File Reading section in the Preliminary Task section for more information on the test files.
+            For convenience, the following lists the expected output of the pairs in the input-big.txt file in the res folder:
+
+            <div class="example">
+              <h5>Fruit → Strawberry</h5>
+              <p class="return"><code class=" language-cpp"><span class="token punctuation">{</span><span class="token string">"Fruit"</span><span class="token punctuation">,</span> <span class="token string">"Strawberry"</span><span class="token punctuation">}</span></code></p>
+              <p class="note">This should return almost instantly since it is a one link jump.</p>
+            </div>
+
+            <div class="example">
+              <h5>Milkshake → Gene</h5>
+              <p class="return"><code class=" language-cpp"><span class="token punctuation">{</span><span class="token string">"Milkshake"</span><span class="token punctuation">,</span> <span class="token string">"Barley"</span><span class="token punctuation">,</span> <span class="token string">"Gene"</span><span class="token punctuation">}</span></code></p>
+              <p class="note">This ran in less than 60 seconds on our computers.
+              </p>
+            </div>
+            <div class="aside-container">
+
+            <div class="aside trans100 blue">
+            <p>Running in less than two minutes is acceptable as well, due to some variation we’ve seen across Mac vs. Windows computers. (The variation most likely results from differences in the order of the <code>unordered_set</code>.)</p>
+          </div>
+        </div>
+
+            <div class="example">
+              <h5>Emu → Stanford_University</h5>
+              <p class="return">
+                <code class=" language-cpp"><span class="token punctuation">{</span><span class="token string">"Emu"</span><span class="token punctuation">,</span> <span class="token string">"Encyclop%C3%A6dia_Britannica_Eleventh_Edition"</span><span class="token punctuation">,</span> <span class="token string">"Cornell_University"</span><span class="token punctuation">,</span> <span class="token string">"Stanford_University"</span><span class="token punctuation">}</span></code><br>
+                or:
+                <code class=" language-cpp"><span class="token punctuation">{</span><span class="token string">"Emu"</span><span class="token punctuation">,</span> <span class="token string">"Beetle"</span><span class="token punctuation">,</span> <span class="token string">"University_of_Florida"</span><span class="token punctuation">,</span> <span class="token string">"Florida_State_University"</span><span class="token punctuation">,</span> <span class="token string">"University_of_California,_Berkeley"</span><span class="token punctuation">,</span> <span class="token string">"Stanford_University"</span><span class="token punctuation">}</span></code>
+              </p>
+              <p class="note">These two ladders result from differences in the order of valid links
+                in the unordered set from Part A. If you generate ladders that are longer than the solution ladder,
+                but the number of common links matches the first step of the solution given here, you should be fine!
+                Feel free to post to Piazza if you have any questions or want to double-check.</p>
+            </div>
+
+            <div class="aside-container">
+              <div class="aside trans200 red">
+                <p>In general, you don’t need to match these ladders exactly (as long as your ladder is the same length as the sample)
+                but your code should run in less than the times specified.</p>
+
+                <p>If not, double-check:
+                  </p><ul>
+                    <li>are you using references where needed?</li>
+                    <li>Can you remove any redundant variables?</li>
+                    <li>Are you missing any steps in the ladder algorithm?</li>
+                  </ul>
+                Most often, slowness tends to come from either a small algorithm error
+                or inefficient design choices in the lambda.<p></p>
+              </div>
+            </div>
+
+            <p>Hint: consult the lecture on lambdas to see how you can make the comparator function on the fly.
+            In particular, you are <b>required</b> to leverage a special mechanism of lambdas to capture the WikiScraper object
+             so that it can be used in the lambda.</p>
+
+            <p>If you want to discuss your plan of attack, please make a private post on Piazza or come to office hours!
+              The code for this assignment is not long at all, but it can be hard to wrap your head around.
+              Ask questions early if things don’t make sense; we will be more than happy to talk through ideas with you.</p>
+            <br>
+
+          </div>
+
+        </div>
+
+      <div class="panel">
+        <h3>Submitting</h3>
+        <p>First, make sure your assignment satisfies the following:</p>
+        <ul>
+          <li>You are using the STL algorithms described in Part A, rather than their explicit loop equivalents.
+            In total, you should only use <b>one</b> loop while writing your <code>findWikiLinks</code> function.
+            <b>Note that you will need other loops for other parts of the assignment--that's totally fine!</b></li>
+          <li>You are <b>not</b> using indices or builtin string methods such as <code>string.find</code>.</li>
+          <li>You can run the examples in the Testing section within reasonable time limits.</li>
+        </ul>
+        <p>When you're finished, submit <b>two files:</b> <code>main.cpp</code> and <code>wikiscraper.cpp</code>
+          from the WikiRacer project on Paperless!</p>
+
+        <p>And finally... <span style="font-size: 2em;">Good luck! :)</span></p>
+
+      </div>
+    </div>
+
+      <script src="./Assignment 1_files/prism.js"></script>
+      <!-- <footer>
+      <small>© 2020. Created by Ethan Chi and Nikhil Raghuraman.</small>
+    </footer> -->
+  
+  
+</div></body></html>
